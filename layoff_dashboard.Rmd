@@ -1,0 +1,232 @@
+---
+title: "Employee Layoff"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(plotly)
+```
+```{r}
+layoff <- read.csv("~/Dashboard/layoff.csv")
+df= as.data.frame(layoff)
+```
+
+
+Dashboard 1
+=======================================================================
+
+Column {.tabset .tabset-fade data-width=650}
+-----------------------------------------------------------------------
+
+### Company Wise 
+
+```{r}
+top_n_company <- df%>%
+                  group_by(company)%>%
+                  summarise(total_laid = sum(total_laid_off))%>%
+                  arrange(desc(total_laid))%>%
+                  head(n = 10)
+fig <- plot_ly(top_n_company, x = ~ company, y = ~total_laid, type = 'bar', color = ~company)
+fig <- fig %>% layout(title = "Top 10 company",
+                       xaxis = list(title = "Company"),
+                       yaxis = list(title = "No. of employee"))
+fig
+
+
+```
+
+### Country wise
+```{r}
+top_n_country <- df%>%
+         group_by(country)%>%
+         summarise(total_laid = sum(total_laid_off))%>%
+        mutate(percent_laid = total_laid/sum(total_laid)*100)%>%
+         arrange(desc(total_laid))%>%
+  head(n = 10)
+fig<- plot_ly(top_n_country, labels = ~country, values = ~total_laid, type = 'pie')
+fig <- fig %>% layout(title = "Top 10 Country")
+fig
+
+
+```
+
+
+
+### Industry wise
+
+
+```{r}
+industry_layoff <- df%>%
+  group_by(industry)%>%
+  summarise(total_layoff = sum(total_laid_off))%>%
+  arrange(desc(total_layoff))
+
+
+fig <- plot_ly(industry_layoff, x = ~ industry, y = ~total_layoff, type = 'bar', color = ~industry)
+fig <- fig %>% layout(title = "Industry wise Layoff",
+                      xaxis = list(title = "Industry"),
+                      yaxis = list(title = "No. of employee"))
+fig
+
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+  fig <- plot_ly(df, x = ~total_laid_off, y = ~percentage_laid_off, type = 'scatter',text = ~company,
+                  marker = list(size = 10,
+                                color = 'rgba(255, 182, 193, .9)',
+                                line = list(color = 'rgba(152, 0, 0, .8)',
+                                            width = 2)))
+   fig <- fig %>% layout(title = 'Layoff vs Percentage Of layoff',
+                         yaxis = list(title = "No. of layoff", zeroline = FALSE),
+                         xaxis = list(title = "Percentage of employee", zeroline = FALSE))
+   fig
+
+```
+
+### Fund Raised vs Layoff
+
+```{r}
+## relationship btw fund recived and layoff
+
+fig <- plot_ly(df, x = ~funds_raised, y = ~total_laid_off, type = 'scatter' ,
+               color = ~total_laid_off, size = ~total_laid_off,
+               text = ~company)
+fig <- fig %>% layout(title = 'Layoff vs Percentage Of layoff',
+                      yaxis = list(title = "Fund Raised", zeroline = FALSE),
+                      xaxis = list(title = "No. of Layoff", zeroline = FALSE))
+   fig
+   
+
+```
+
+USA DASHBOARD
+=======================================================================
+
+Column {.tabset .tabset-fade data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+usa_layoff <- df%>%
+  filter(country == "United States")
+
+location_usa <- usa_layoff%>%
+  group_by(location)%>%
+  summarise(total_layoff = sum(total_laid_off))%>%
+  arrange(desc(total_layoff))%>%
+  head(n = 10)
+fig<- plot_ly(location_usa, labels = ~location, values = ~total_layoff, type = 'pie')
+fig <- fig %>% layout(title = "Location wise layoff in USA")
+
+
+fig
+
+```
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+company_usa <- usa_layoff%>%
+  group_by(company)%>%
+  summarise(total_layoff = sum(total_laid_off))%>%
+  arrange(desc(total_layoff))%>%
+  head(n = 5)
+
+fig <- plot_ly(company_usa, x = ~ company, y = ~total_layoff, type = 'bar', color = ~company)
+fig <- fig %>% layout(title = "Company wise layoff in USA",
+                      xaxis = list(title = "Company"),
+                      yaxis = list(title = "No. of Employee"))   
+fig
+
+
+```
+
+### Chart B
+
+```{r}
+usa_layoff <- df%>%
+  filter(country == "United States")
+fig <- plot_ly(usa_layoff, x = ~funds_raised, y = ~total_laid_off, type = 'scatter',
+               color = ~total_laid_off, size = ~total_laid_off,
+               text = ~company)
+fig <- fig %>% layout(title = 'Layoff vs Funds Raised',
+                      yaxis = list(title = "Fund Raised", zeroline = FALSE),
+                      xaxis = list(title = "No. of Layoff", zeroline = FALSE))
+fig
+
+
+
+```
+
+INDIA DASHBOARD
+=======================================================================
+
+Column {.tabset .tabset-fade data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+india_layoff <- df%>%
+  filter(country == "India")
+location_india <- india_layoff%>%
+  group_by(location)%>%
+  summarise(total_layoff = sum(total_laid_off))%>%
+  arrange(desc(total_layoff))%>%
+  head(n = 10)
+fig<- plot_ly(location_usa, labels = ~location, values = ~total_layoff, type = 'pie')
+fig <- fig %>% layout(title = "Location wise layoff in India")
+
+
+fig
+
+```
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+
+company_india <- india_layoff%>%
+  group_by(company)%>%
+  summarise(total_layoff = sum(total_laid_off))%>%
+  arrange(desc(total_layoff))%>%
+  head(n = 5)
+
+fig <- plot_ly(company_india, x = ~ company, y = ~total_layoff, type = 'bar', color = ~company)
+fig <- fig %>% layout(title = "Company wise layoff in India",
+                      xaxis = list(title = "Company"),
+                      yaxis = list(title = "No. of employee"))   
+fig
+
+```
+
+### Chart B
+
+```{r}
+fig <- plot_ly(india_layoff, x = ~funds_raised, y = ~total_laid_off, type = 'scatter',
+               color = ~total_laid_off, size = ~total_laid_off,
+               text = ~company)
+fig <- fig %>% layout(title = 'Layoff vs Funds Raised',
+                      yaxis = list(title = "Fund Raised", zeroline = FALSE),
+                      xaxis = list(title = "No. of Layoff", zeroline = FALSE))
+fig
+
+
+```
